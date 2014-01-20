@@ -4,6 +4,7 @@ namespace Twitter;
 
 require_once (__DIR__ . '/SearchMetaData.php');
 require_once (__DIR__ . '/Status.php');
+require_once (__DIR__ . '/User.php');
 
 require_once (__DIR__ . '/twitteroauth/twitteroauth.php');
 
@@ -35,8 +36,7 @@ class TwitterBot {
 	}
 	
 	/**
-	 *
-	 * @return unknown
+	 * @return \Twitter\User
 	 */
 	public function verifyCredentials() {
 		$connection = new \TwitterOAuth ( $this->oauthConsumerKey, $this->oauthConsumerSecret, $this->oauthToken, $this->oauthTokenSecret );
@@ -44,8 +44,8 @@ class TwitterBot {
 		// Returns an HTTP 200 OK response code and a representation of the requesting user if authentication was successful;
 		// returns a 401 status code and an error message if not. Use this method to test if supplied user credentials are valid.
 		$account = $connection->get( 'account/verify_credentials' );
-
-		return $account;
+		$user = User::createFrom($account);
+		return $user;
 	}
 	
 	/**

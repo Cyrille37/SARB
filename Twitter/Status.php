@@ -2,10 +2,12 @@
 
 namespace Twitter;
 
+require_once(__DIR__.'/ObjectBase.php');
+
 /**
  * https://dev.twitter.com/docs/platform-objects/tweets
  */
-class Status {
+class Status  extends ObjectBase  {
 	
 	/**
 	 *
@@ -70,26 +72,6 @@ class Status {
 	protected $geo;
 	
 	/**
-	 * The integer representation of the unique identifier for this Tweet.
-	 * This number is greater than 53 bits and some programming languages may have difficulty/silent defects in interpreting it. Using a signed 64 bit integer for storing this identifier is safe. Use id_str for fetching the identifier to stay on the safe side.
-	 *
-	 * @var int64 The integer representation of the unique identifier for this Tweet
-	 */
-	protected $id;
-	
-	public function getId(){
-		return $this->id ;
-	}
-
-	/**
-	 * The string representation of the unique identifier for this Tweet.
-	 * Implementations should use this rather than the large integer in id
-	 *
-	 * @var string The string representation of the unique identifier for this Tweet.
-	 */
-	protected $id_str;
-	
-	/**
 	 *
 	 * @var string
 	 */
@@ -118,12 +100,6 @@ class Status {
 	 * @var string
 	 */
 	protected $in_reply_to_user_id_str;
-	
-	/**
-	 *
-	 * @var string
-	 */
-	protected $lang;
 	
 	/**
 	 *
@@ -232,14 +208,9 @@ class Status {
 	 * @param array $object        	
 	 * @return \Twitter\Status
 	 */
-	public static function createFromArray(Array $object) {
-		$smd = new Status();
-		$vars = get_object_vars ( $smd );
-		foreach ( $vars as $k => $v ) {
-			if (isset ( $object [$k] )) {
-				$smd->{$k} = $object [$k];
-			}
-		}
-		return $smd;
+	public static function createFrom(Array $object) {
+
+		$status = parent::createFrom($object);
+		return $status ;
 	}
 }
