@@ -146,7 +146,10 @@ class Status  extends ObjectBase  {
 	
 	/**
 	 * Users can amplify the broadcast of tweets authored by other users by retweeting.
-	 * Retweets can be distinguished from typical Tweets by the existence of a retweeted_status attribute. This attribute contains a representation of the original Tweet that was retweeted. Note that retweets of retweets do not show representations of the intermediary retweet, but only the original tweet. (Users can also unretweet a retweet they created by deleting their retweet.)
+	 * Retweets can be distinguished from typical Tweets by the existence of a retweeted_status attribute.
+	 * This attribute contains a representation of the original Tweet that was retweeted.
+	 * Note that retweets of retweets do not show representations of the intermediary retweet, but only the original tweet.
+	 * (Users can also unretweet a retweet they created by deleting their retweet.)
 	 *
 	 * @var Status
 	 */
@@ -227,6 +230,12 @@ class Status  extends ObjectBase  {
 
 		$status = new Status();
 		parent::initWith($status, $data);
+		if( $status->retweeted_status!=null)
+		{
+			$s2 = new Status();
+			parent::initWith( $s2, $status->retweeted_status);
+			$status->retweeted_status = $s2 ;
+		}
 		return $status ;
 	}
 }
