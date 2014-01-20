@@ -1,4 +1,4 @@
 SARB
 ====
 
-A Twitter Search And Retweet Bot
+A Twitter Search And Retweet Bot.

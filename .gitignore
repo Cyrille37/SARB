@@ -1,13 +1,7 @@
-# Bootstrap
-app/bootstrap*
+# Application's secrets (consumer key and secret, ...)
+secrets.txt
 
-# Symfony directories
-vendor/*
-*/logs/*
-*/cache/*
-web/uploads/*
-web/bundles/*
-
-# Configuration files
-app/config/parameters.ini
-app/config/parameters.yml
+# Eclipse's files
+.settings
+.project
+.buildpath
