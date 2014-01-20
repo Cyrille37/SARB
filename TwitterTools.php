@@ -97,10 +97,15 @@ class TwitterTools {
 		fclose ( $fr );
 		return trim ( $input );
 	}
-	public function essai01($query, $count) {
+	/**
+	 * 
+	 * @param string $query
+	 * @param int $count
+	 */
+	public function search($query, $count) {
 		$statuses = $this->tBot->searchTweets ( $query, $count );
 		
-		echo 'essai01 count statuses = ', count ( $statuses ), "\n";
+		echo 'search found statuses count = ', count ( $statuses ), "\n";
 		
 		$statusesId = array ();
 		foreach ( $statuses as $status ) {
@@ -110,16 +115,16 @@ class TwitterTools {
 			else
 				$statusesId [$id] = 1;
 		}
-		echo 'essai01 count statusesId = ', count ( $statusesId ), "\n";
+		echo 'search uniques statused Id count = ', count ( $statusesId ), "\n";
 	}
 }
 
 $tt = new TwitterTools ( __DIR__ . '/secrets.txt' );
 
-// $tt->essai01('#OSM', 1000);
-// $tt->essai01('#PTCE', 1000);
+// $tt->search('#OSM', 1000);
+$tt->search('#PTCE', 1000);
 
 // $tt->userAuthApplication ();
 
-$tt->verifyCredentials ();
+//$tt->verifyCredentials ();
 
