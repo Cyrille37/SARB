@@ -107,13 +107,13 @@ class TwitterBot {
 		$smd = SearchMetaData::createFromArray ( $response ['search_metadata'] );
 		// echo var_export($smd,true),"\n";
 		
-		echo 'response statuses count = ', count ( $response ['statuses'] ), "\n";
+		//echo 'response statuses count = ', count ( $response ['statuses'] ), "\n";
 		
 		// $statuses = array ();
 		foreach ( $response ['statuses'] as $status ) {
-			$statuses [] = Status::createFromArray ( $status );
+			$statuses [] = Status::createFrom( $status );
 		}
-		echo 'statuses count = ', count ( $statuses ), "\n";
+		//echo 'statuses count = ', count ( $statuses ), "\n";
 		
 		if ($smd->asMoreResults ())
 			$statuses = $this->searchTweets ( $query, $count, $statuses );
@@ -178,7 +178,7 @@ class TwitterBot {
 			throw new Exception ( 'Request failed! Unknow method=' . $method );
 		}
 		
-		echo 'url: ', $url, "\n";
+		//echo 'url: ', $url, "\n";
 		
 		curl_setopt ( $c, CURLOPT_URL, $url );
 		
