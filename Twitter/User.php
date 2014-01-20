@@ -221,9 +221,10 @@ class User extends ObjectBase {
 	 * @param mixed $object
 	 * @return \Twitter\User
 	 */
-	public static function create($object) {
+	public static function createFrom($data) {
 		
-		$user = parent::createFrom($object);
+		$user = new User();
+		parent::initWith($user, $data);
 		return $user ;
 		
 	}

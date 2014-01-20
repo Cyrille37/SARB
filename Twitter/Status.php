@@ -72,25 +72,30 @@ class Status  extends ObjectBase  {
 	protected $geo;
 	
 	/**
-	 *
+	 * If the represented Tweet is a reply, this field will contain the screen name of the original Tweet's author.
+	 * Nullable.
 	 * @var string
 	 */
 	protected $in_reply_to_screen_name;
 	
 	/**
-	 *
+	 * If the represented Tweet is a reply, this field will contain the integer representation of the original Tweet's ID.
+	 * Nullable.
 	 * @var int64
 	 */
 	protected $in_reply_to_status_id;
 	
 	/**
-	 *
+	 * If the represented Tweet is a reply, this field will contain the string representation of the original Tweet's ID.
+	 * Nullable.
 	 * @var string
 	 */
 	protected $in_reply_to_status_id_str;
 	
 	/**
-	 *
+	 * If the represented Tweet is a reply, this field will contain the integer representation of the original Tweet's author ID.
+	 * This will not necessarily always be the user directly mentioned in the Tweet.
+	 * Nullable.
 	 * @var int64
 	 */
 	protected $in_reply_to_user_id;
@@ -146,6 +151,16 @@ class Status  extends ObjectBase  {
 	 * @var Status
 	 */
 	protected $retweeted_status;
+
+	public function getRetweetedStatus()
+	{
+		return $this->retweeted_status ;	
+	}
+
+	public function isRetweet()
+	{
+		return $this->retweeted_status != null ;
+	}
 	
 	/**
 	 * Utility used to post the Tweet, as an HTML-formatted string.
@@ -208,9 +223,10 @@ class Status  extends ObjectBase  {
 	 * @param array $object        	
 	 * @return \Twitter\Status
 	 */
-	public static function createFrom(Array $object) {
+	public static function createFrom($data) {
 
-		$status = parent::createFrom($object);
+		$status = new Status();
+		parent::initWith($status, $data);
 		return $status ;
 	}
 }

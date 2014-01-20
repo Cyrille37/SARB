@@ -49,24 +49,23 @@ class ObjectBase {
 	 * @param mixed $object
 	 * @return \Twitter\ObjectBase
 	 */
-	public static function createFrom($object) {
-		$user = new User();
-		$vars = get_object_vars ( $user );
-		if( is_array($object))
+	public static function initWith( $object, $data) {
+
+		$vars = get_object_vars ( $object );
+		if( is_array($data))
 		foreach ( $vars as $k => $v ) {
-			if (isset ( $object [$k] )) {
-				$user->{$k} = $object [$k];
+			if (isset ( $data [$k] )) {
+				$object->{$k} = $data [$k];
 			}
 		}
-		else if( is_object($object))
+		else if( is_object($data))
 		{
 			foreach ( $vars as $k => $v ) {
-				if (isset ( $object->{$k} )) {
-					$user->{$k} = $object->{$k};
+				if (isset ( $data->{$k} )) {
+					$object->{$k} = $data->{$k};
 				}
 			}
 		}
-		return $user;
 	}
 	
 	
