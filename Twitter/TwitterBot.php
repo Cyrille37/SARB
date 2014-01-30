@@ -137,7 +137,7 @@ class TwitterBot
                 $qs = implode('&', $params);
                 $url = strlen($qs) > 0 ? $url . '?' . $qs : $this->url;
             } else {
-                throw new Exception('Request failed! Unknow method=' . $method);
+                throw new \Exception('Request failed! Unknow method=' . $method);
             }
         
         // echo 'url: ', $url, "\n";
@@ -150,7 +150,7 @@ class TwitterBot
         curl_close($c);
         
         if ($code != 200) {
-            throw new Exception('Request failed! code=' . $code . ', response= ' . $response);
+            throw new \Exception('Request failed! code=' . $code . ', response= ' . $response);
             // echo 'CODE : '.$code ."\n";
             // echo 'INFO: '.var_export($info,true)."\n";
             // echo 'RESPONSE: '.var_export($response, true)."\n";
@@ -188,7 +188,7 @@ class TwitterBot
         // echo 'access_token: ', $response->access_token , "\n";
         
         if ($response->token_type != 'bearer') {
-            throw new Exception('Auth failed! Uknow how to handle token type = ' . $response->token_type);
+            throw new \Exception('Auth failed! Uknow how to handle token type = ' . $response->token_type);
         }
         
         $this->bearerToken = $response->access_token;
@@ -197,15 +197,19 @@ class TwitterBot
 
     /**
      * Seach for tweets which match the query.
-     *
+     * Only recents tweets (< 7 days ?!).
+     * This method use the API 1.1 with a Bearer Token.
      * Recurcive function.
      *
+     * GET search/tweets https://dev.twitter.com/docs/api/1.1/get/search/tweets
+     * Using the Twitter Search API https://dev.twitter.com/docs/using-search
+     * 
      * @param string $query            
      * @param int $count            
      * @param array $statuses            
      * @return \Twitter\Status[]
      */
-    public function searchTweets($query, $count = \Config::SEARCH_RESULTS_DEFAULT, Array &$statuses = array())
+    public function searchRecentsTweets($query, $count = \Config::SEARCH_RESULTS_DEFAULT, Array &$statuses = array())
     {
         $this->getBearerToken();
         
@@ -213,7 +217,9 @@ class TwitterBot
         // $statuses =array();
         
         $params = array(
-            'q' => $query
+            'q' => $query,
+            'include_entities' => false ,
+            'result_type' => 'mixed'
         );
         
         $statusesCount = count($statuses);
@@ -236,7 +242,9 @@ class TwitterBot
         // echo 'RESPONSE: ' . var_export ( $response, true ) . "\n";
         
         $smd = SearchMetaData::createFromArray($response['search_metadata']);
-        // echo var_export($smd,true),"\n";
+        echo var_export($smd,true),"\n";
+        $respStatusesCount = count($response['statuses']);
+        echo 'respStatusesCount = ',$respStatusesCount,"\n";
         
         // echo 'response statuses count = ', count ( $response ['statuses'] ), "\n";
         
@@ -246,12 +254,90 @@ class TwitterBot
         }
         // echo 'statuses count = ', count ( $statuses ), "\n";
         
-        if ($smd->asMoreResults())
+        //if ($smd->asMoreResults())
+        if( $respStatusesCount > 0 )
             $statuses = $this->searchTweets($query, $count, $statuses);
-        
+
         return $statuses;
     }
 
+    /**
+     * FIXME : À faire pour retrouver tous les tweets sur plusieurs années
+     * Cete méthode demande d'être identifiée avec un user (pas de Bearer Token).
+     * 
+     * https://twitter.com/i/search/timeline?q=%23PTCE&src=typd&include_available_features=1&include_entities=1&last_note_ts=0&scroll_cursor=TWEET-422868369579069441-428568485875023872
+     * 
+     * https://twitter.com/i/search/timeline
+     * ?q=%23PTCE
+     * &src=typd
+     * &composed_count=0
+     * &include_available_features=1
+     * &include_entities=1
+     * &include_new_items_bar=true
+     * &interval=30000
+     * &last_note_ts=0
+     * &latent_count=0
+     * &refresh_cursor=TWEET-422868369579069441-428568485875023872
+     * 
+     * https://twitter.com/i/search/timeline
+     * ?q=%23PTCE
+     * &src=typd
+     * &include_available_features=1
+     * &include_entities=1
+     * &last_note_ts=0
+     * &scroll_cursor=TWEET-356717097121878016-428568485875023872
+     * 
+     * https://twitter.com/i/search/timeline
+     * ?q=%23PTCE
+     * &src=typd
+     * &include_available_features=1
+     * &include_entities=1
+     * &last_note_ts=0
+     * &oldest_unread_id=0&scroll_cursor=TWEET-229842253957439488-428568485875023872
+     * 
+     * https://twitter.com/i/search/timeline
+     * ?q=%23PTCE&src=typd
+     * &include_available_features=1
+     * &include_entities=1
+     * &last_note_ts=0
+     * &oldest_unread_id=0
+     * &scroll_cursor=TWEET-229842253957439488-428568485875023872
+     * 
+     * @param unknown $query
+     * @param unknown $count
+     * @param array $statuses
+     * @return \Twitter\Status
+     */
+    public function searchTimelineTweets($query, $count = \Config::SEARCH_RESULTS_DEFAULT, Array &$statuses = array())
+    {
+        
+        //$this->getBearerToken();
+        $connection = new \TwitterOAuth($this->oauthConsumerKey, $this->oauthConsumerSecret, $this->oauthToken, $this->oauthTokenSecret);
+        
+        // if( $statuses == null )
+        // $statuses =array();
+
+        $params = array(
+            'q' => $query,
+            'include_entities' => false ,
+        );
+
+        $statusesCount = count($statuses);
+
+        $headers = array();
+        //$response = $this->_requestAppContext(\Config::TWITTER_URL_TIMELINE, 'GET', $headers, $params);
+        $response = $connection->get(\Config::TWITTER_URL_TIMELINE, $params );
+        //$response = $connection->get('i/search/timeline', $params );
+        //echo var_export($response,true),"\n";
+        foreach( $response as $k=>$v )
+        {
+            echo $k, "\n";
+        }
+        $statuses = array();
+
+        return $statuses;
+    }
+ 
     /**
      * Returns a single Tweet, specified by the id parameter.
      * The Tweet's author will also be embedded within the tweet.
@@ -274,4 +360,5 @@ class TwitterBot
         $status = Status::createFrom($response);
         return $status;
     }
+
 }
