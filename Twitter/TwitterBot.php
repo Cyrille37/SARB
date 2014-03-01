@@ -13,6 +13,52 @@ require_once (__DIR__ . '/twitteroauth/twitteroauth.php');
 class TwitterBot
 {
 
+    const OAUTH_URL_REQUEST_TOKEN = 'https://api.twitter.com/oauth/request_token';
+
+    const OAUTH_URL_AUTHORIZE = 'https://api.twitter.com/oauth/authorize';
+
+    const OAUTH_URL_ACCESS_TOKEN = 'https://api.twitter.com/oauth/access_token';
+
+    const OAUTH_URL_BEARER_TOKEN = 'https://api.twitter.com//oauth2/token';
+
+    const OAUTH_SIGNATURE_METHOD = 'HMAC-SHA1';
+
+    const TWITTER_URL_SHOW = 'https://api.twitter.com/1.1/statuses/show.json';
+
+    /**
+     * https://dev.twitter.com/docs/api/1.1/get/search/tweets
+     *
+     * @var string url for search
+     */
+    const TWITTER_URL_SEARCH = 'https://api.twitter.com/1.1/search/tweets.json';
+
+    const TWITTER_URL_TIMELINE = 'https://twitter.com/i/search/timeline';
+
+    const TWITTER_URL_USER_TIMELINE = 'https://api.twitter.com/1.1/statuses/user_timeline.json';
+
+    /**
+     * https://api.twitter.com/1.1/search/tweets.json
+     *
+     * @var number
+     */
+    const SEARCH_RESULTS_MAX = 100;
+    
+    const SEARCH_RESULTS_DEFAULT = 15;
+    
+    const HTTP_USERAGENT = 'SARB v0.1';
+    
+    const HTTP_CONNECTTIMEOUT = 5;
+    
+    const HTTP_TIMEOUT = 5;
+    
+    const HTTP_SSL_VERIFYPEER = true;
+    
+    const HTTP_FOLLOWLOCATION = false;
+    
+    const HTTP_PROXY = null;
+    
+    const HTTP_ENCODING = 'UTF-8';
+    
     protected $oauthConsumerKey;
 
     protected $oauthConsumerSecret;
@@ -84,6 +130,8 @@ class TwitterBot
     /**
      * Request on twitter within an application-only context.
      *
+     * TODO : move this method to twitteroauth package
+     *
      * @param string $url            
      * @param string $method            
      * @param array $headers            
@@ -108,14 +156,14 @@ class TwitterBot
         
         $c = curl_init();
         curl_setopt_array($c, array(
-            CURLOPT_USERAGENT => \Config::HTTP_USERAGENT,
-            CURLOPT_CONNECTTIMEOUT => \Config::HTTP_CONNECTTIMEOUT,
-            CURLOPT_TIMEOUT => \Config::HTTP_TIMEOUT,
+            CURLOPT_USERAGENT => self::HTTP_USERAGENT,
+            CURLOPT_CONNECTTIMEOUT => self::HTTP_CONNECTTIMEOUT,
+            CURLOPT_TIMEOUT => self::HTTP_TIMEOUT,
             CURLOPT_RETURNTRANSFER => TRUE,
-            CURLOPT_SSL_VERIFYPEER => \Config::HTTP_SSL_VERIFYPEER,
-            CURLOPT_FOLLOWLOCATION => \Config::HTTP_FOLLOWLOCATION,
-            CURLOPT_PROXY => \Config::HTTP_PROXY,
-            CURLOPT_ENCODING => \Config::HTTP_ENCODING,
+            CURLOPT_SSL_VERIFYPEER => self::HTTP_SSL_VERIFYPEER,
+            CURLOPT_FOLLOWLOCATION => self::HTTP_FOLLOWLOCATION,
+            CURLOPT_PROXY => self::HTTP_PROXY,
+            CURLOPT_ENCODING => self::HTTP_ENCODING,
             CURLOPT_HTTPHEADER => $httpheaders,
             CURLINFO_HEADER_OUT => true
         ));
@@ -178,7 +226,7 @@ class TwitterBot
         $headers['Authorization'] = 'Basic ' . $creds;
         $headers['Content-Type'] = 'application/x-www-form-urlencoded;charset=UTF-8';
         
-        $response = $this->_requestAppContext(\Config::OAUTH_URL_BEARER_TOKEN, 'POST', $headers, array(
+        $response = $this->_requestAppContext(self::OAUTH_URL_BEARER_TOKEN, 'POST', $headers, array(
             'grant_type' => 'client_credentials'
         ));
         
@@ -203,13 +251,13 @@ class TwitterBot
      *
      * GET search/tweets https://dev.twitter.com/docs/api/1.1/get/search/tweets
      * Using the Twitter Search API https://dev.twitter.com/docs/using-search
-     * 
+     *
      * @param string $query            
      * @param int $count            
      * @param array $statuses            
      * @return \Twitter\Status[]
      */
-    public function searchRecentsTweets($query, $count = \Config::SEARCH_RESULTS_DEFAULT, Array &$statuses = array())
+    public function searchRecentsTweets($query, $count = self::SEARCH_RESULTS_DEFAULT, Array &$statuses = array())
     {
         $this->getBearerToken();
         
@@ -218,7 +266,7 @@ class TwitterBot
         
         $params = array(
             'q' => $query,
-            'include_entities' => false ,
+            'include_entities' => false,
             'result_type' => 'mixed'
         );
         
@@ -229,22 +277,22 @@ class TwitterBot
         }
         
         $tmpCount = $count - $statusesCount;
-        if ($tmpCount <= \Config::SEARCH_RESULTS_MAX)
+        if ($tmpCount <= self::SEARCH_RESULTS_MAX)
             $params['count'] = $tmpCount;
         else
-            $params['count'] = \Config::SEARCH_RESULTS_MAX;
+            $params['count'] = self::SEARCH_RESULTS_MAX;
         
         $headers = array();
-        $response = $this->_requestAppContext(\Config::TWITTER_URL_SEARCH, 'GET', $headers, $params);
+        $response = $this->_requestAppContext(self::TWITTER_URL_SEARCH, 'GET', $headers, $params);
         
         $response = json_decode($response, true);
         // response should containts 2 keys: statuses & search_metadata
         // echo 'RESPONSE: ' . var_export ( $response, true ) . "\n";
         
         $smd = SearchMetaData::createFromArray($response['search_metadata']);
-        echo var_export($smd,true),"\n";
+        echo var_export($smd, true), "\n";
         $respStatusesCount = count($response['statuses']);
-        echo 'respStatusesCount = ',$respStatusesCount,"\n";
+        echo 'respStatusesCount = ', $respStatusesCount, "\n";
         
         // echo 'response statuses count = ', count ( $response ['statuses'] ), "\n";
         
@@ -254,19 +302,19 @@ class TwitterBot
         }
         // echo 'statuses count = ', count ( $statuses ), "\n";
         
-        //if ($smd->asMoreResults())
-        if( $respStatusesCount > 0 )
+        // if ($smd->asMoreResults())
+        if ($respStatusesCount > 0)
             $statuses = $this->searchTweets($query, $count, $statuses);
-
+        
         return $statuses;
     }
 
     /**
      * FIXME : À faire pour retrouver tous les tweets sur plusieurs années
      * Cete méthode demande d'être identifiée avec un user (pas de Bearer Token).
-     * 
+     *
      * https://twitter.com/i/search/timeline?q=%23PTCE&src=typd&include_available_features=1&include_entities=1&last_note_ts=0&scroll_cursor=TWEET-422868369579069441-428568485875023872
-     * 
+     *
      * https://twitter.com/i/search/timeline
      * ?q=%23PTCE
      * &src=typd
@@ -278,7 +326,7 @@ class TwitterBot
      * &last_note_ts=0
      * &latent_count=0
      * &refresh_cursor=TWEET-422868369579069441-428568485875023872
-     * 
+     *
      * https://twitter.com/i/search/timeline
      * ?q=%23PTCE
      * &src=typd
@@ -286,7 +334,7 @@ class TwitterBot
      * &include_entities=1
      * &last_note_ts=0
      * &scroll_cursor=TWEET-356717097121878016-428568485875023872
-     * 
+     *
      * https://twitter.com/i/search/timeline
      * ?q=%23PTCE
      * &src=typd
@@ -294,7 +342,7 @@ class TwitterBot
      * &include_entities=1
      * &last_note_ts=0
      * &oldest_unread_id=0&scroll_cursor=TWEET-229842253957439488-428568485875023872
-     * 
+     *
      * https://twitter.com/i/search/timeline
      * ?q=%23PTCE&src=typd
      * &include_available_features=1
@@ -302,42 +350,41 @@ class TwitterBot
      * &last_note_ts=0
      * &oldest_unread_id=0
      * &scroll_cursor=TWEET-229842253957439488-428568485875023872
-     * 
-     * @param unknown $query
-     * @param unknown $count
-     * @param array $statuses
+     *
+     * @param unknown $query            
+     * @param unknown $count            
+     * @param array $statuses            
      * @return \Twitter\Status
      */
-    public function searchTimelineTweets($query, $count = \Config::SEARCH_RESULTS_DEFAULT, Array &$statuses = array())
+    public function searchTimelineTweets($query, $count = self::SEARCH_RESULTS_DEFAULT, Array &$statuses = array())
     {
         
-        //$this->getBearerToken();
+        // $this->getBearerToken();
         $connection = new \TwitterOAuth($this->oauthConsumerKey, $this->oauthConsumerSecret, $this->oauthToken, $this->oauthTokenSecret);
         
         // if( $statuses == null )
         // $statuses =array();
-
+        
         $params = array(
             'q' => $query,
-            'include_entities' => false ,
+            'include_entities' => false
         );
-
+        
         $statusesCount = count($statuses);
-
+        
         $headers = array();
-        //$response = $this->_requestAppContext(\Config::TWITTER_URL_TIMELINE, 'GET', $headers, $params);
-        $response = $connection->get(\Config::TWITTER_URL_TIMELINE, $params );
-        //$response = $connection->get('i/search/timeline', $params );
-        //echo var_export($response,true),"\n";
-        foreach( $response as $k=>$v )
-        {
+        // $response = $this->_requestAppContext(self::TWITTER_URL_TIMELINE, 'GET', $headers, $params);
+        $response = $connection->get(self::TWITTER_URL_TIMELINE, $params);
+        // $response = $connection->get('i/search/timeline', $params );
+        // echo var_export($response,true),"\n";
+        foreach ($response as $k => $v) {
             echo $k, "\n";
         }
         $statuses = array();
-
+        
         return $statuses;
     }
- 
+
     /**
      * Returns a single Tweet, specified by the id parameter.
      * The Tweet's author will also be embedded within the tweet.
@@ -355,10 +402,38 @@ class TwitterBot
             'id' => $id
         );
         $headers = array();
-        $response = $this->_requestAppContext(\Config::TWITTER_URL_SHOW, 'GET', $headers, $params);
+        $response = $this->_requestAppContext(self::TWITTER_URL_SHOW, 'GET', $headers, $params);
         $response = json_decode($response, true);
         $status = Status::createFrom($response);
         return $status;
     }
 
+    /**
+     * Returns a collection of the most recent Tweets posted by the user indicated by the user_id.
+     * This method can only return up to 3,200 of a user's most recent Tweets.
+     * Native retweets of other statuses by the user is included in this total, regardless of whether include_rts is set to false when requesting this resource.
+     * 
+     * https://dev.twitter.com/docs/api/1.1/get/statuses/user_timeline
+     *
+     * @param int $maxCount            
+     * @return \Twitter\Status[]
+     */
+    public function getUserTimeline($userId, $maxCount = 3200)
+    {
+        $connection = new \TwitterOAuth($this->oauthConsumerKey, $this->oauthConsumerSecret, $this->oauthToken, $this->oauthTokenSecret);
+        
+        $params = array(
+            'user_id' => $userId,
+            'include_rts' => 1
+        );
+        $headers = array();
+        $response = $connection->get(self::TWITTER_URL_USER_TIMELINE, $params);
+        echo var_export($response, true), "\n";
+        foreach ($response as $k => $v) {
+            echo $k, "\n";
+        }
+        $statuses = array();
+        
+        return $statuses;
+    }
 }
