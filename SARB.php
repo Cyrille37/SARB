@@ -49,12 +49,12 @@ class SARB
 
     public function run($searchString, $onlyLang)
     {
-        $userTweets = $this->tBot->getUserTimeline('2300465034');
+        $userTweets = $this->tBot->getUserTimeline();
         // var_export($userTweets );
-        //echo "\n", 'User tweets count = ', count($userTweets), "\n";
+        //echo 'User tweets count = ', count($userTweets), "\n";
 
         $foundTweets = $this->tBot->searchTweets($searchString, self::SEARCH_COUNT, $onlyLang);
-        //echo "\n", 'Found tweets count = ', count($foundTweets), "\n";
+        //echo 'Found tweets count = ', count($foundTweets), "\n";
         
         $toRetweets = array();
         foreach ($foundTweets as $ft) {

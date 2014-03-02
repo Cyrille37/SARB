@@ -48,6 +48,7 @@ class TwitterBot
     const SEARCH_RESULTS_DEFAULT = 15;
 
     const TIMELINE_MAX_TWEETS = 3200 ;
+    const TIMELINE_MAX_TWEETS_PER_REQUEST = 200 ;
     
     const HTTP_USERAGENT = 'SARB v0.1';
 
@@ -466,24 +467,38 @@ class TwitterBot
     public function getUserTimeline($userId=null, $maxCount = self::TIMELINE_MAX_TWEETS)
     {
         $connection = new \TwitterOAuth($this->oauthConsumerKey, $this->oauthConsumerSecret, $this->oauthToken, $this->oauthTokenSecret);
-        
+
         if( $userId == null )
             $userId = $this->getUserId();
 
         $params = array(
             'user_id' => $userId,
-            'include_rts' => 1
+            'count' => $maxCount ,
+            'include_rts' => 1,
+            'trim_user' => 1
         );
         $headers = array();
-        $response = $connection->get(self::TWITTER_URL_USER_TIMELINE, $params);
-        // echo var_export($response, true), "\n";
-        
+
         $statuses = array();
-        foreach ($response as $k => $v) {
-            // echo $k, "\n";
-            $status = Status::createFrom($v);
-            $statuses[] = $status;
-        }
+        
+        $foundCount = 0 ;
+        do {
+            $response = $connection->get(self::TWITTER_URL_USER_TIMELINE, $params);
+            //echo var_export($response, true), "\n";
+            
+            $foundCount = 0 ;
+            $maxId = PHP_INT_MAX ;
+            foreach ($response as $k => $v) {
+                // echo $k, "\n";
+                $status = Status::createFrom($v);
+                $statuses[] = $status;
+                $foundCount ++ ;
+                $maxId = min( $maxId, $status->getId());
+            }
+            $params['max_id'] = $maxId-1 ;
+            
+        } while( $foundCount > 0 );
+
         return $statuses;
     }
 }
