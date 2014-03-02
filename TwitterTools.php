@@ -45,6 +45,7 @@ class TwitterTools
      */
     public function __construct($secretsFilename)
     {
+        /*
         $secrets = file($secretsFilename, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
         $oauthConsumerKey = $oauthConsumerSecret = null;
         $oauthToken = $oauthTokenSecret = null;
@@ -68,6 +69,11 @@ class TwitterTools
         
         $this->tBot = new Twitter\TwitterBot($oauthConsumerKey, $oauthConsumerSecret);
         $this->tBot->setAccessToken($oauthToken, $oauthTokenSecret);
+        */
+
+        $authData = Config::readSecretFile($secretsFilename);
+        $this->tBot = new Twitter\TwitterBot( $authData['oauthConsumerKey'], $authData['oauthConsumerSecret'] );
+        $this->tBot->setAccessToken( $authData['userId'], $authData['oauthToken'], $authData['oauthTokenSecret'] );
     }
 
     /**
@@ -89,10 +95,10 @@ class TwitterTools
         // echo 'request token: ', $requestToken['token']['oauth_token'],"\n";
         // echo 'request token_secret: ', $requestToken['token']['oauth_token_secret'],"\n";
         // echo 'request redirect_url: ', $requestToken['url'],"\n";
-
+        
         echo 'To authorize SARB to use your account,', "\n", 'please visit ', $requestToken['url'], "\n";
         $pincode = self::ask_stdin('Please, enter the PIN: ');
-
+        
         $accessToken = $this->tBot->getAccessToken($requestToken['token']['oauth_token'], $requestToken['token']['oauth_token_secret'], $pincode);
         echo 'Store these Access Token to permit SARB to use "', $accessToken['screen_name'], '" account.', "\n";
         echo 'OAUTH_ACCESS_TOKEN: ', $accessToken['oauth_token'], "\n";
@@ -116,9 +122,9 @@ class TwitterTools
     public function search($query, $count)
     {
         $statuses = $this->tBot->searchRecentsTweets($query, $count);
-
+        
         echo 'search found statuses count = ', count($statuses), "\n";
-
+        
         $statusesId = array();
         foreach ($statuses as $status) {
             $id = $status->getId();
@@ -133,7 +139,6 @@ class TwitterTools
     public function searchTimeline($query, $count)
     {
         $statuses = $this->tBot->searchTimelineTweets($query, $count);
-        
     }
 
     /**
@@ -144,9 +149,9 @@ class TwitterTools
     public function analyseStory($query, $count)
     {
         $statuses = $this->tBot->searchRecentsTweets($query, $count);
-
+        
         echo 'search found statuses count = ', count($statuses), "\n";
-
+        
         $retweets = 0;
         $retweetsmore = 0;
         $notretweets = 0;
@@ -169,26 +174,23 @@ class TwitterTools
         }
         
         $orphans = 0;
-            foreach ($statuses as $status) {
+        foreach ($statuses as $status) {
             if (! $status->isRetweet())
                 if (! isset($orignals[$status->getId()]))
                     $orphans ++;
         }
-
-        $orignalsNotFound = 0 ;
-        foreach ($orignals as $rid => $v ) {
-            $found = false ;
-            foreach( $statuses as $status )
-            {
-                if( $status->getId() == $rid )
-                {
-                    $found = true ;
-                    break ;
+        
+        $orignalsNotFound = 0;
+        foreach ($orignals as $rid => $v) {
+            $found = false;
+            foreach ($statuses as $status) {
+                if ($status->getId() == $rid) {
+                    $found = true;
+                    break;
                 }
             }
-            if( ! $found )
-            {
-                $orignalsNotFound++;
+            if (! $found) {
+                $orignalsNotFound ++;
                 $status = $this->tBot->getTweet($rid);
                 echo '> ', $rid, ' ', $status->getCreatedAt(), ' @', $status->getUser()->getScreenName(), ' ', $status->getText(), "\n";
             }
@@ -197,28 +199,36 @@ class TwitterTools
         echo 'search retweets count = ', $retweets, "\n";
         echo 'search notretweets count = ', $notretweets, "\n";
         echo 'search retweets+notretweets count = ', ($retweets + $notretweets), "\n\n";
-
+        
         echo 'search retweetsmore count = ', $retweetsmore, "\n";
         echo 'search orignals count = ', count($orignals), "\n";
         echo 'search orphans count = ', $orphans, "\n";
         echo 'search orphans+orignals count = ', ($orphans + count($orignals)), "\n";
-
+        
         echo 'search orignalsNotFound count = ', $orignalsNotFound, "\n";
         
         echo '$orignals: ', var_export($orignals, true), "\n";
     }
 }
 
-$tt = new TwitterTools(__DIR__ . '/secrets.txt');
+// ==================================
 
+$opts = getopt('c:');
+
+if (! isset($opts['c']) || ! file_exists($opts['c'])) {
+    die('Must have a configuration file (-cConfigFilename)' . "\n");
+}
+
+$tt = new TwitterTools( $opts['c']);
+
+//$tt->userAuthApplication();
+$tt->verifyCredentials ();
+
+// $tt->verifyCredentials ();
+// $tt->analyseStory('#PTCE', 1000);
 // $tt->search('#OSM', 1000);
 // $tt->search('#PTCE', 1000);
-
 // $tt->userAuthApplication ();
-// $tt->verifyCredentials ();
-
-//$tt->analyseStory('#PTCE', 1000);
-
-$tt->searchTimeline('#PTCE', 1000);
+//$tt->searchTimeline('#PTCE', 1000);
 
 
