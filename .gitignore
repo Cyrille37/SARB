@@ -1,5 +1,6 @@
 # Application's secrets (consumer key and secret, ...)
 secrets.*.txt
+!secrets.example.txt
 
 # my temporary work
 _work
