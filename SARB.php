@@ -135,7 +135,7 @@ $onlyLang = null;
 if (isset($opts['l'])) {
     $onlyLang = $opts['l'];
 }
-$simulation = isset($opts['l']) ? true : false;
+$simulation = isset($opts['z']) ? true : false;
 
 $sarb = new SARB($opts['c'], $simulation);
 
