@@ -36,6 +36,8 @@ class TwitterBot
 
     const TWITTER_URL_USER_TIMELINE = 'https://api.twitter.com/1.1/statuses/user_timeline.json';
 
+    const TWITTER_URL_RETWEET = 'https://api.twitter.com/1.1/statuses/retweet/:id.json' ;
+
     /**
      * https://api.twitter.com/1.1/search/tweets.json
      *
@@ -152,7 +154,7 @@ class TwitterBot
      * @throws Exception
      * @return string The server response
      */
-    protected function _requestAppContext($url, $method, Array $headers, Array $data)
+    protected function _requestAppContext($url, $method, Array $headers, Array $data = array())
     {
         
         // CURL defaults to setting this to Expect: 100-Continue
@@ -270,7 +272,7 @@ class TwitterBot
      * @param array $statuses            
      * @return \Twitter\Status[]
      */
-    public function searchRecentsTweets($query, $count = self::SEARCH_RESULTS_DEFAULT, Array &$statuses = array())
+    public function searchTweets($query, $count = self::SEARCH_RESULTS_DEFAULT, $onlyLang=null, Array &$statuses = array())
     {
         $this->getBearerToken();
         
@@ -282,6 +284,11 @@ class TwitterBot
             'include_entities' => false,
             'result_type' => 'mixed'
         );
+
+        if( $onlyLang != null )
+        {
+            $params['lang'] = $onlyLang ;
+        }
         
         $statusesCount = count($statuses);
         if ($statusesCount > 0) {
@@ -291,10 +298,15 @@ class TwitterBot
         
         $tmpCount = $count - $statusesCount;
         if ($tmpCount <= self::SEARCH_RESULTS_MAX)
-            $params['count'] = $tmpCount;
+            $params['count'] = $tmpCount >= 0 ? $tmpCount : 0 ;
         else
-            $params['count'] = self::SEARCH_RESULTS_MAX;
-        
+        $params['count'] = self::SEARCH_RESULTS_MAX;
+
+        if( $params['count'] == 0 )
+        {
+            return $statuses;
+        }
+
         $headers = array();
         $response = $this->_requestAppContext(self::TWITTER_URL_SEARCH, 'GET', $headers, $params);
         
@@ -303,9 +315,9 @@ class TwitterBot
         // echo 'RESPONSE: ' . var_export ( $response, true ) . "\n";
         
         $smd = SearchMetaData::createFromArray($response['search_metadata']);
-        echo var_export($smd, true), "\n";
+        //echo var_export($smd, true), "\n";
         $respStatusesCount = count($response['statuses']);
-        echo 'respStatusesCount = ', $respStatusesCount, "\n";
+        //echo 'respStatusesCount = ', $respStatusesCount, "\n";
         
         // echo 'response statuses count = ', count ( $response ['statuses'] ), "\n";
         
@@ -317,7 +329,7 @@ class TwitterBot
         
         // if ($smd->asMoreResults())
         if ($respStatusesCount > 0)
-            $statuses = $this->searchTweets($query, $count, $statuses);
+            $statuses = $this->searchTweets($query, $count, $onlyLang, $statuses);
         
         return $statuses;
     }
@@ -389,12 +401,14 @@ class TwitterBot
         // $response = $this->_requestAppContext(self::TWITTER_URL_TIMELINE, 'GET', $headers, $params);
         $response = $connection->get(self::TWITTER_URL_TIMELINE, $params);
         // $response = $connection->get('i/search/timeline', $params );
+        
+        $statuses = array();
         // echo var_export($response,true),"\n";
         foreach ($response as $k => $v) {
-            echo $k, "\n";
+           // echo $k, "\n";
+            $statuses[] = $v ;
         }
-        $statuses = array();
-        
+
         return $statuses;
     }
 
@@ -419,6 +433,24 @@ class TwitterBot
         $response = json_decode($response, true);
         $status = Status::createFrom($response);
         return $status;
+    }
+
+    /**
+     * 
+     * @param number $tweetId
+     * @return \Twitter\Status
+     */
+    public function retweet( $tweetId )
+    {
+
+        $url = self::TWITTER_URL_RETWEET ;
+        $url = str_replace(':id', $tweetId, $url);
+
+        $connection = new \TwitterOAuth($this->oauthConsumerKey, $this->oauthConsumerSecret, $this->oauthToken, $this->oauthTokenSecret);
+        $response = $connection->post($url);
+
+        $status = Status::createFrom($response);
+        return $status ;
     }
 
     /**
