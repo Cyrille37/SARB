@@ -42,23 +42,25 @@ class TwitterBot
      * @var number
      */
     const SEARCH_RESULTS_MAX = 100;
-    
+
     const SEARCH_RESULTS_DEFAULT = 15;
+
+    const TIMELINE_MAX_TWEETS = 3200 ;
     
     const HTTP_USERAGENT = 'SARB v0.1';
-    
+
     const HTTP_CONNECTTIMEOUT = 5;
-    
+
     const HTTP_TIMEOUT = 5;
-    
+
     const HTTP_SSL_VERIFYPEER = true;
-    
+
     const HTTP_FOLLOWLOCATION = false;
-    
+
     const HTTP_PROXY = null;
-    
+
     const HTTP_ENCODING = 'UTF-8';
-    
+
     protected $oauthConsumerKey;
 
     protected $oauthConsumerSecret;
@@ -68,6 +70,8 @@ class TwitterBot
     protected $oauthToken;
 
     protected $oauthTokenSecret;
+
+    protected $userId;
 
     /**
      *
@@ -83,10 +87,19 @@ class TwitterBot
         $this->oauthConsumerSecret = $oauthConsumerSecret;
     }
 
-    public function setAccessToken($oauthToken, $oauthTokenSecret)
+    public function setAccessToken($userId, $oauthToken, $oauthTokenSecret)
     {
+        $this->userId = $userId;
         $this->oauthToken = $oauthToken;
         $this->oauthTokenSecret = $oauthTokenSecret;
+    }
+
+    /**
+     * @return number
+     */
+    public function getUserId()
+    {
+        return $this->userId;
     }
 
     /**
@@ -412,28 +425,33 @@ class TwitterBot
      * Returns a collection of the most recent Tweets posted by the user indicated by the user_id.
      * This method can only return up to 3,200 of a user's most recent Tweets.
      * Native retweets of other statuses by the user is included in this total, regardless of whether include_rts is set to false when requesting this resource.
-     * 
+     *
      * https://dev.twitter.com/docs/api/1.1/get/statuses/user_timeline
      *
      * @param int $maxCount            
      * @return \Twitter\Status[]
      */
-    public function getUserTimeline($userId, $maxCount = 3200)
+    public function getUserTimeline($userId=null, $maxCount = self::TIMELINE_MAX_TWEETS)
     {
         $connection = new \TwitterOAuth($this->oauthConsumerKey, $this->oauthConsumerSecret, $this->oauthToken, $this->oauthTokenSecret);
         
+        if( $userId == null )
+            $userId = $this->getUserId();
+
         $params = array(
             'user_id' => $userId,
             'include_rts' => 1
         );
         $headers = array();
         $response = $connection->get(self::TWITTER_URL_USER_TIMELINE, $params);
-        echo var_export($response, true), "\n";
-        foreach ($response as $k => $v) {
-            echo $k, "\n";
-        }
-        $statuses = array();
+        // echo var_export($response, true), "\n";
         
+        $statuses = array();
+        foreach ($response as $k => $v) {
+            // echo $k, "\n";
+            $status = Status::createFrom($v);
+            $statuses[] = $status;
+        }
         return $statuses;
     }
 }

@@ -11,7 +11,9 @@ class Config
             'oauthConsumerKey' => null,
             'oauthConsumerSecret' => null,
             'oauthToken' => null,
-            'oauthTokenSecret' => null
+            'oauthTokenSecret' => null,
+            'userId' => null ,
+            'userScreenName' => null ,
         );
         
         foreach ($secrets as $line) {
@@ -32,6 +34,9 @@ class Config
                     break;
                 case 'OAUTH_ACCESS_SECRET':
                     $auth['oauthTokenSecret'] = trim($value);
+                    break;
+                case 'USERID':
+                    $auth['userId'] = trim($value);
                     break;
             }
         }
