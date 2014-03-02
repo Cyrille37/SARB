@@ -10,10 +10,11 @@ require_once ('Twitter/TwitterBot.php');
  *
  * PHP version 5.4+
  *
- * example :
+ * examples :
  * $ ./SARB.php -csecrets.txt -s'#PTCE'
  * $ ./SARB.php -csecrets.txt -s'#PTCE' -lfr
- *
+ * $ ./SARB.php -csecrets.2291285905.txt -s'#PTCE' -lfr -z
+ * 
  * @category Internet
  * @package SARB
  * @author Cyrille37 <cyrille37@gmail.com>
