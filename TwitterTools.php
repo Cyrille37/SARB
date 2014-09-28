@@ -45,38 +45,13 @@ class TwitterTools
      */
     public function __construct($secretsFilename)
     {
-        /*
-        $secrets = file($secretsFilename, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-        $oauthConsumerKey = $oauthConsumerSecret = null;
-        $oauthToken = $oauthTokenSecret = null;
-        foreach ($secrets as $line) {
-            list ($key, $value) = @explode(':', $line);
-            switch (trim($key)) {
-                case 'OAUTH_CONSUMER_KEY':
-                    $oauthConsumerKey = trim($value);
-                    break;
-                case 'OAUTH_CONSUMER_SECRET':
-                    $oauthConsumerSecret = trim($value);
-                    break;
-                case 'OAUTH_ACCESS_TOKEN':
-                    $oauthToken = trim($value);
-                    break;
-                case 'OAUTH_ACCESS_SECRET':
-                    $oauthTokenSecret = trim($value);
-                    break;
-            }
-        }
-        
-        $this->tBot = new Twitter\TwitterBot($oauthConsumerKey, $oauthConsumerSecret);
-        $this->tBot->setAccessToken($oauthToken, $oauthTokenSecret);
-        */
-
         $authData = Config::readSecretFile($secretsFilename);
         $this->tBot = new Twitter\TwitterBot( $authData['oauthConsumerKey'], $authData['oauthConsumerSecret'] );
         $this->tBot->setAccessToken( $authData['userId'], $authData['oauthToken'], $authData['oauthTokenSecret'] );
     }
 
     /**
+     * Verify that credentials containing in a SARB's configuration file are right.
      */
     public function verifyCredentials()
     {
@@ -86,8 +61,10 @@ class TwitterTools
     }
 
     /**
-     * Interactive console way to obtain user authorization and access token.
-     * These token should be put in 'secrets.txt'.
+     * Interactive console way to obtain user authorization and access token for the application SARB.
+     * To get those data you must first put application id & secret in a SARB's configuration file :
+     * - OAUTH_CONSUMER_KEY: xxx
+     * - OAUTH_CONSUMER_SECRET: xx
      */
     public function userAuthApplication()
     {
@@ -119,9 +96,9 @@ class TwitterTools
      * @param string $query            
      * @param int $count            
      */
-    public function search($query, $count)
+    public function search($query, $count, $lang)
     {
-        $statuses = $this->tBot->searchRecentsTweets($query, $count);
+		$statuses = $this->tBot->searchTweets($query, $count, $lang);
         
         echo 'search found statuses count = ', count($statuses), "\n";
         
@@ -213,22 +190,40 @@ class TwitterTools
 
 // ==================================
 
-$opts = getopt('c:');
+$opts = getopt('c:a:q:l:');
 
 if (! isset($opts['c']) || ! file_exists($opts['c'])) {
-    die('Must have a configuration file (-cConfigFilename)' . "\n");
+    die('Must have a configuration file (-c ConfigFilename)' . "\n");
+}
+if (! isset($opts['a']) ) {
+    die('Must ask for an action (-a authApp|verifyCred|search)' . "\n");
 }
 
 $tt = new TwitterTools( $opts['c']);
 
-//$tt->userAuthApplication();
-$tt->verifyCredentials ();
+switch( $opts['a'] )
+{
+	case 'authApp':
+		$tt->userAuthApplication();
+		break;
+	case 'verifyCred':
+		$tt->verifyCredentials();
+		break;
+	case 'search':
+		if (! isset($opts['q']) ) {
+			die('Action "search" must have a query (-q abcd)' . "\n");
+		}
+		if (isset($opts['l']) ) {
+			$lang = $opts['l'] ;
+		}
+		else{
+			$lang = '' ;
+		}
+		$tt->search($opts['q'], 1000, $lang);
+		break;
+}
 
-// $tt->verifyCredentials ();
 // $tt->analyseStory('#PTCE', 1000);
-// $tt->search('#OSM', 1000);
-// $tt->search('#PTCE', 1000);
-// $tt->userAuthApplication ();
 //$tt->searchTimeline('#PTCE', 1000);
 
 
