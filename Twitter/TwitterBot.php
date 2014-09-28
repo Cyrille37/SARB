@@ -19,7 +19,7 @@ class TwitterBot
 
     const OAUTH_URL_ACCESS_TOKEN = 'https://api.twitter.com/oauth/access_token';
 
-    const OAUTH_URL_BEARER_TOKEN = 'https://api.twitter.com//oauth2/token';
+    const OAUTH_URL_BEARER_TOKEN = 'https://api.twitter.com/oauth2/token';
 
     const OAUTH_SIGNATURE_METHOD = 'HMAC-SHA1';
 
