@@ -1,10 +1,10 @@
 # SARB
-[![Gitter](https://badges.gitter.im/Join Chat.svg)](https://gitter.im/Cyrille37/SARB?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
-
 
 A Twitter Search And Retweet Bot.
 
 Becarefull before use: you must "nettoyer tes tuyaux" with this : http://www.youtube.com/watch?v=wdpXyI3_Qpk
+
+[![Gitter](https://badges.gitter.im/Join Chat.svg)](https://gitter.im/Cyrille37/SARB?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 ## Description
 
