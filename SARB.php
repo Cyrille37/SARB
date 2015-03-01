@@ -82,7 +82,7 @@ class SARB
         	if( in_array($ft->getUser()->getId(), $blockedUsersIds ) )
         	{
         		if ($this->simulation)
-        			echo "\t", 'skip blocked user', $ft->getUser()->getId(),"\n";
+        			echo "\t", 'skip blocked user ', $ft->getUser()->getId(),"\n";
         		continue;
         	}
 

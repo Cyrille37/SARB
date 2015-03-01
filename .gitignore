@@ -3,6 +3,7 @@
 
 secrets.*.txt
 !secrets.example.txt
+toto.txt
 
 # my temporary work
 _work
