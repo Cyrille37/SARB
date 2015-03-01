@@ -54,3 +54,11 @@ il est possible de limiter la recherche à une langue (option -l)
 ```
 ./TwitterTools.php -c secrets.txt -a search -q '#enjoy' -l fr
 ```
+
+## Versions
+
+version 0.2
+- filtre les utilisateurs bloqués (pas retweetés)
+- ajout commandes "blocksIds" et "getUserByScreenName" à TwitterTools (et donc aussi à TwitterBot)
+- refactoring gestion connexion dans TwitterBot
+- refactoring SARB des prints en mode simulation
