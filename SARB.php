@@ -59,47 +59,70 @@ class SARB
             // var_export($userTweets );
             echo 'User tweets count = ', count($userTweets), "\n";
         }
-        
+
+        $blockedUsersIds = $this->tBot->getBlocksIds();
+
         $foundTweets = $this->tBot->searchTweets($searchString, self::SEARCH_COUNT, $onlyLang);
+
         if ($this->simulation) {
             echo 'Found tweets count = ', count($foundTweets), "\n";
         }
-        
+
         $toRetweets = array();
-        foreach ($foundTweets as $ft) {
-            
+        foreach ($foundTweets as $ft)
+        {
             // echo $ft->getLang(),',';
-            
+
+        	// Do not process blocked user
+        	if( in_array($ft->getUser()->getId(), $blockedUsersIds ) )
+        	{
+        		if ($this->simulation)
+        			echo "\t", 'skip blocked user', $ft->getUser()->getId(),"\n";
+        		continue;
+        	}
+
+			// Do not process retweet
             if ($ft->isRetweet()) {
-                continue;
+        		if ($this->simulation)
+        			echo "\t", 'skip retweet',"\n";
+            	continue;
             }
-            
+
             $toRetweet = true;
-            foreach ($userTweets as $ut) {
-                if ($ft->getId() == $ut->getId()) {
+            foreach ($userTweets as $ut)
+            {
+				// Do not retweet user's tweet
+                if( $ft->getId() == $ut->getId())
+                {
                     $toRetweet = false;
                     break;
                 }
-                if ($ut->isRetweet() && $ft->getId() == $ut->getRetweetedStatus()->getId()) {
+                // Already retweeted
+                if( $ut->isRetweet() && $ft->getId() == $ut->getRetweetedStatus()->getId())
+                {
                     $toRetweet = false;
                     break;
                 }
             }
-            if ($toRetweet) {
+            if ($toRetweet)
+            {
                 $toRetweets[] = $ft;
             }
-        }
-        if ($this->simulation) {
-            echo "\n", 'To retweets count = ', count($toRetweets), "\n";
-        }
-        
-        if ($this->simulation)
-            return;
-        
-        foreach ($toRetweets as $tweet) {
-            $this->tBot->retweet($tweet->getId());
-            usleep(self::PAUSE_BETWEEN_RETWEET_MS);
-        }
+		}
+
+		if ($this->simulation)
+		{
+			echo "\n", 'To retweets count = ', count($toRetweets), "\n";
+		}
+
+		if ($this->simulation)
+			return;
+
+		foreach ($toRetweets as $tweet)
+		{
+			$this->tBot->retweet($tweet->getId());
+			usleep(self::PAUSE_BETWEEN_RETWEET_MS);
+		}
     }
 }
 

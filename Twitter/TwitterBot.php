@@ -38,6 +38,8 @@ class TwitterBot
 
     const TWITTER_URL_RETWEET = 'https://api.twitter.com/1.1/statuses/retweet/:id.json' ;
 
+    const TWITTER_URL_BLOCKS_IDS = 'https://api.twitter.com/1.1/blocks/ids.json' ;
+
     /**
      * https://api.twitter.com/1.1/search/tweets.json
      *
@@ -212,11 +214,11 @@ class TwitterBot
         $code = curl_getinfo($c, CURLINFO_HTTP_CODE);
         $info = curl_getinfo($c);
         curl_close($c);
-        
+
         if ($code != 200) {
             throw new \Exception('Request failed! code=' . $code . ', response= ' . $response);
             // echo 'CODE : '.$code ."\n";
-            // echo 'INFO: '.var_export($info,true)."\n";
+            echo 'INFO: '.var_export($info,true)."\n";
             // echo 'RESPONSE: '.var_export($response, true)."\n";
         }
         return $response;
@@ -501,4 +503,39 @@ class TwitterBot
 
         return $statuses;
     }
+
+    /**
+     * Return the list of blocked users's id.
+     * 
+     * https://dev.twitter.com/rest/reference/get/blocks/ids
+     * 
+     * @return string[]:
+     */
+	public function getBlocksIds()
+	{
+		$connection = new \TwitterOAuth($this->oauthConsumerKey, $this->oauthConsumerSecret, $this->oauthToken, $this->oauthTokenSecret);
+
+        $headers = array();
+
+        $ids = array();
+
+        $params = array(
+            'cursor' => null,
+        	'stringify_ids' => true
+        );
+
+		$cursor = -1 ;
+		do {
+			$params['cursor'] = $cursor ;
+        	$response = $connection->get(self::TWITTER_URL_BLOCKS_IDS, $params);
+			//echo 'RESPONSE: ', var_export($response, true), "\n";
+
+			$ids = array_merge( $ids, $response->ids);
+			$cursor = $response->next_cursor;
+
+		} while( $cursor != 0 );
+		
+		return $ids ;
+	}
+
 }

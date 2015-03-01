@@ -186,6 +186,17 @@ class TwitterTools
         
         echo '$orignals: ', var_export($orignals, true), "\n";
     }
+    
+    public function getBlocksIds()
+    {
+    	$ids = $this->tBot->getBlocksIds();
+    	
+    	echo 'Blocked ids:',"\n";
+    	foreach( $ids as $id )
+    	{
+    		echo "\t", 'id: ', $id, "\n";
+    	}
+    }
 }
 
 // ==================================
@@ -206,9 +217,18 @@ switch( $opts['a'] )
 	case 'authApp':
 		$tt->userAuthApplication();
 		break;
+
 	case 'verifyCred':
 		$tt->verifyCredentials();
 		break;
+
+	case 'blocksIds':
+		// example:
+		//	./TwitterTools.php -c secrets.veillePTCE.txt -a blocksIds
+
+		$tt->getBlocksIds();
+		break;
+
 	case 'search':
 		if (! isset($opts['q']) ) {
 			die('Action "search" must have a query (-q abcd)' . "\n");
