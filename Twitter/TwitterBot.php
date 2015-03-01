@@ -80,6 +80,8 @@ class TwitterBot
 
     protected $userId;
 
+    protected $connection = null ;
+
     /**
      *
      * @param string $oauthConsumerKey            
@@ -96,9 +98,21 @@ class TwitterBot
 
     public function setAccessToken($userId, $oauthToken, $oauthTokenSecret)
     {
+    	// reset connection
+    	$this->connection = null ;
+
         $this->userId = $userId;
         $this->oauthToken = $oauthToken;
         $this->oauthTokenSecret = $oauthTokenSecret;
+    }
+
+    public function getConnection()
+    {
+    	if( $this->connection == null )
+    	{
+    		$this->connection = new \TwitterOAuth($this->oauthConsumerKey, $this->oauthConsumerSecret, $this->oauthToken, $this->oauthTokenSecret);
+    	}
+    	return $this->connection ;
     }
 
     /**
@@ -115,7 +129,8 @@ class TwitterBot
      */
     public function verifyCredentials()
     {
-        $connection = new \TwitterOAuth($this->oauthConsumerKey, $this->oauthConsumerSecret, $this->oauthToken, $this->oauthTokenSecret);
+        //$connection = new \TwitterOAuth($this->oauthConsumerKey, $this->oauthConsumerSecret, $this->oauthToken, $this->oauthTokenSecret);
+    	$connection = $this->getConnection();
         
         // Returns an HTTP 200 OK response code and a representation of the requesting user if authentication was successful;
         // returns a 401 status code and an error message if not. Use this method to test if supplied user credentials are valid.
@@ -451,7 +466,9 @@ class TwitterBot
         $url = self::TWITTER_URL_RETWEET ;
         $url = str_replace(':id', $tweetId, $url);
 
-        $connection = new \TwitterOAuth($this->oauthConsumerKey, $this->oauthConsumerSecret, $this->oauthToken, $this->oauthTokenSecret);
+        //$connection = new \TwitterOAuth($this->oauthConsumerKey, $this->oauthConsumerSecret, $this->oauthToken, $this->oauthTokenSecret);
+        $connection = $this->getConnection();
+
         $response = $connection->post($url);
 
         $status = Status::createFrom($response);
@@ -470,7 +487,8 @@ class TwitterBot
      */
     public function getUserTimeline($userId=null, $maxCount = self::TIMELINE_MAX_TWEETS)
     {
-        $connection = new \TwitterOAuth($this->oauthConsumerKey, $this->oauthConsumerSecret, $this->oauthToken, $this->oauthTokenSecret);
+        //$connection = new \TwitterOAuth($this->oauthConsumerKey, $this->oauthConsumerSecret, $this->oauthToken, $this->oauthTokenSecret);
+        $connection = $this->getConnection();
 
         if( $userId == null )
             $userId = $this->getUserId();
@@ -515,7 +533,8 @@ class TwitterBot
      */
 	public function getBlocksIds()
 	{
-		$connection = new \TwitterOAuth($this->oauthConsumerKey, $this->oauthConsumerSecret, $this->oauthToken, $this->oauthTokenSecret);
+		//$connection = new \TwitterOAuth($this->oauthConsumerKey, $this->oauthConsumerSecret, $this->oauthToken, $this->oauthTokenSecret);
+		$connection = $this->getConnection();
 
         $headers = array();
 
@@ -542,7 +561,8 @@ class TwitterBot
 
 	public function getUserByScreenName($screenName)
 	{
-		$connection = new \TwitterOAuth($this->oauthConsumerKey, $this->oauthConsumerSecret, $this->oauthToken, $this->oauthTokenSecret);
+		//$connection = new \TwitterOAuth($this->oauthConsumerKey, $this->oauthConsumerSecret, $this->oauthToken, $this->oauthTokenSecret);
+		$connection = $this->getConnection();
 
 		$params = array(
 			'screen_name' => $screenName,

@@ -53,15 +53,21 @@ class SARB
 
     public function run($searchString, $onlyLang)
     {
+		if ($this->simulation) {
+        	echo 'SIMULATION MODE','(searchString=', $searchString, '), (onlyLang=',$onlyLang,')',"\n";
+        }
+
         $userTweets = $this->tBot->getUserTimeline();
         
         if ($this->simulation) {
-        	echo 'SIMULATION MODE',"\n";
-            // var_export($userTweets );
             echo 'User tweets count = ', count($userTweets), "\n";
         }
 
         $blockedUsersIds = $this->tBot->getBlocksIds();
+
+        if ($this->simulation) {
+            echo 'Blocked users count = ', count($blockedUsersIds), "\n";
+        }
 
         $foundTweets = $this->tBot->searchTweets($searchString, self::SEARCH_COUNT, $onlyLang);
 
@@ -73,9 +79,8 @@ class SARB
         foreach ($foundTweets as $ft)
         {
         	if ($this->simulation){
-        	// echo $ft->getLang(),',';
             	echo 'UserId: ', $ft->getUser()->getId(), "\n";
-            	echo 'TweetId: ', $ft->getId(), "\n";
+            	echo 'TweetId: ', $ft->getId(), ', Lang: ',$ft->getLang(), "\n";
         	}
 
         	// Do not process blocked user
@@ -107,7 +112,7 @@ class SARB
                 // Already retweeted
                 if( $ut->isRetweet() && $ft->getId() == $ut->getRetweetedStatus()->getId())
                 {
-	        		if ($this->simulation)
+					if ($this->simulation)
 	        			echo "\t", 'skip already retweeted',"\n";
                 	$toRetweet = false;
                     break;
