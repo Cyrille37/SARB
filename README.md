@@ -14,6 +14,10 @@ Il lui faut donc:
 - ce compte doit autauriser l'application SARB
 - et aussi, de préférence, un ordinateur allumé en permanence et connecté à Internet ;-)
 
+Seulement les tweets originaux sont retweetés, les retweets trouvés sont ignorés.
+
+Les utilisateurs bloqués ne sont pas retweetés. 
+
 ## Mode d'emploi
 
 Pour comprendre le mode d'emploi il est préférable de connaitre le [protocole oauth2](https://dev.twitter.com/oauth/application-only) utilisé par Tweeter.
