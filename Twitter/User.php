@@ -48,6 +48,17 @@ class User extends ObjectBase
     protected $description;
 
     /**
+     * Nullable.
+     * The user-defined UTF-8 string describing their account.
+     *
+     * @return string
+     */
+    public function getDescription()
+    {
+    	return $this->description;
+    }
+
+    /**
      * Entities which have been parsed out of the url or description fields defined by the user.
      *
      * @var Entities
@@ -89,12 +100,34 @@ class User extends ObjectBase
     protected $followers_count;
 
     /**
+     * The number of followers this account currently has.
+     * Under certain conditions of duress, this field will temporarily indicate "0."
+     *
+     * @return int
+     */
+    public function getFollowersCount()
+    {
+    	return $this->followers_count;
+    }
+
+    /**
      * The number of users this account is following (AKA their "followings").
      * Under certain conditions of duress, this field will temporarily indicate "0."
      *
      * @var int
      */
     protected $friends_count;
+
+    /**
+     * The number of users this account is following (AKA their "followings").
+     * Under certain conditions of duress, this field will temporarily indicate "0."
+     *
+     * @return int
+     */
+    public function getFriendsCount()
+    {
+    	return $this->friends_count;
+    }
 
     /**
      * When true, indicates that the user has enabled the possibility of geotagging their Tweets.
@@ -137,6 +170,13 @@ class User extends ObjectBase
      */
     protected $name;
 
+    /**
+     * The name of the user, as they've defined it.
+     * Not necessarily a person's name.
+     * Typically capped at 20 characters, but subject to change.
+     *
+     * @return string
+     */
     public function getName()
     {
         return $this->name;
@@ -168,6 +208,14 @@ class User extends ObjectBase
      */
     protected $screen_name;
 
+    /**
+     * The screen name, handle, or alias that this user identifies themselves with.
+     * screen_names are unique but subject to change.
+     * Use id_str as a user identifier whenever possible.
+     * Typically a maximum of 15 characters long, but some historical accounts may exist with longer names.
+     *
+     * @return string
+     */
     public function getScreenName()
     {
         return $this->screen_name;
@@ -236,8 +284,9 @@ class User extends ObjectBase
     protected $withheld_scope;
 
     /**
-     *
-     * @param mixed $object            
+     * Create an User object form a Json object.
+     * 
+     * @param mixed $data            
      * @return \Twitter\User
      */
     public static function createFrom($data)

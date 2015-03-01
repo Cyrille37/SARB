@@ -56,6 +56,7 @@ class SARB
         $userTweets = $this->tBot->getUserTimeline();
         
         if ($this->simulation) {
+        	echo 'SIMULATION MODE',"\n";
             // var_export($userTweets );
             echo 'User tweets count = ', count($userTweets), "\n";
         }
@@ -71,7 +72,11 @@ class SARB
         $toRetweets = array();
         foreach ($foundTweets as $ft)
         {
-            // echo $ft->getLang(),',';
+        	if ($this->simulation){
+        	// echo $ft->getLang(),',';
+            	echo 'UserId: ', $ft->getUser()->getId(), "\n";
+            	echo 'TweetId: ', $ft->getId(), "\n";
+        	}
 
         	// Do not process blocked user
         	if( in_array($ft->getUser()->getId(), $blockedUsersIds ) )
@@ -94,13 +99,17 @@ class SARB
 				// Do not retweet user's tweet
                 if( $ft->getId() == $ut->getId())
                 {
-                    $toRetweet = false;
+	        		if ($this->simulation)
+	        			echo "\t", 'skip my tweet',"\n";
+                	$toRetweet = false;
                     break;
                 }
                 // Already retweeted
                 if( $ut->isRetweet() && $ft->getId() == $ut->getRetweetedStatus()->getId())
                 {
-                    $toRetweet = false;
+	        		if ($this->simulation)
+	        			echo "\t", 'skip already retweeted',"\n";
+                	$toRetweet = false;
                     break;
                 }
             }

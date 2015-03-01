@@ -186,17 +186,34 @@ class TwitterTools
         
         echo '$orignals: ', var_export($orignals, true), "\n";
     }
-    
+
     public function getBlocksIds()
     {
     	$ids = $this->tBot->getBlocksIds();
-    	
+    	 
     	echo 'Blocked ids:',"\n";
     	foreach( $ids as $id )
     	{
     		echo "\t", 'id: ', $id, "\n";
     	}
     }
+
+    public function getUserByScreenName($screenName)
+    {
+    	$user = $this->tBot->getUserByScreenName($screenName);
+
+    	echo 'User:',"\n";
+    	//echo var_export( $user, true),"\n";
+    	echo "\tName: ", $user->getName(), "\n";
+    	echo "\tScreenName: ", $user->getScreenName(), "\n";
+    	echo "\tId: ", $user->getId(), "\n";
+    	echo "\tLang: ", $user->getLang(), "\n";
+    	echo "\tDescription: ", $user->getDescription(), "\n";
+    	echo "\tFollowers count: ", $user->getFollowersCount(), "\n";
+		echo "\tFriends count: ", $user->getFriendsCount(), "\n";
+    	
+    }
+    
 }
 
 // ==================================
@@ -227,6 +244,16 @@ switch( $opts['a'] )
 		//	./TwitterTools.php -c secrets.veillePTCE.txt -a blocksIds
 
 		$tt->getBlocksIds();
+		break;
+
+	case 'getUserByScreenName':
+		// example:
+		//	./TwitterTools.php -c secrets.veillePTCE.txt -a blocksIds
+	
+		if (! isset($opts['q']) ) {
+			die('Action "getUserByScreenName" must have a query (-q MonsieurMachin)' . "\n");
+		}
+		$tt->getUserByScreenName($opts['q']);
 		break;
 
 	case 'search':

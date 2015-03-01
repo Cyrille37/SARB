@@ -40,6 +40,8 @@ class TwitterBot
 
     const TWITTER_URL_BLOCKS_IDS = 'https://api.twitter.com/1.1/blocks/ids.json' ;
 
+	const TWITTER_URL_USERS_SHOW = 'https://api.twitter.com/1.1/users/show.json' ;
+
     /**
      * https://api.twitter.com/1.1/search/tweets.json
      *
@@ -536,6 +538,22 @@ class TwitterBot
 		} while( $cursor != 0 );
 		
 		return $ids ;
+	}
+
+	public function getUserByScreenName($screenName)
+	{
+		$connection = new \TwitterOAuth($this->oauthConsumerKey, $this->oauthConsumerSecret, $this->oauthToken, $this->oauthTokenSecret);
+
+		$params = array(
+			'screen_name' => $screenName,
+			'include_entities' => true
+		);
+
+		$response = $connection->get(self::TWITTER_URL_USERS_SHOW, $params);
+		echo 'RESPONSE: ', var_export($response, true), "\n";
+		$user = User::createFrom($response);
+		
+		return $user ;
 	}
 
 }
