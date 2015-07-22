@@ -92,9 +92,9 @@ class SARB
 
         }catch( Exception $ex ){
 
-        	echo 'ERROR: ',  $ex->getMessage(), "\n";
-        	echo 'ERROR: At line ',  $ex->getLine(), ' in ', $ex->getFile(), "\n";
-        	echo $ex->getTraceAsString(), "\n";
+        	error_log('ERROR: '.$ex->getMessage());
+        	error_log('ERROR: At line '.$ex->getLine().' in '.$ex->getFile()."\n");
+        	error_log($ex->getTraceAsString());
         	return ;
         }
 
