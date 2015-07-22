@@ -502,12 +502,12 @@ class TwitterBot
         $headers = array();
 
         $statuses = array();
-        
+
         $foundCount = 0 ;
         do {
             $response = $connection->get(self::TWITTER_URL_USER_TIMELINE, $params);
             //echo var_export($response, true), "\n";
-            
+
             $foundCount = 0 ;
             $maxId = PHP_INT_MAX ;
             foreach ($response as $k => $v) {

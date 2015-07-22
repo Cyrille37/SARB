@@ -140,6 +140,10 @@ class TwitterOAuth {
    */
   function get($url, $parameters = array()) {
     $response = $this->oAuthRequest($url, 'GET', $parameters);
+    if( empty($response) ) {
+    	// TODO: retreive the curl (or other cause) error
+    	throw new \Exception(__METHOD__.' encoured a network error');
+    }
     if ($this->format === 'json' && $this->decode_json) {
       return json_decode($response);
     }
@@ -151,6 +155,10 @@ class TwitterOAuth {
    */
   function post($url, $parameters = array()) {
     $response = $this->oAuthRequest($url, 'POST', $parameters);
+    if( empty($response) ) {
+    	// TODO: retreive the curl (or other cause) error
+    	throw new \Exception(__METHOD__.' encoured a network error');
+    }
     if ($this->format === 'json' && $this->decode_json) {
       return json_decode($response);
     }
@@ -192,8 +200,9 @@ class TwitterOAuth {
    */
   function http($url, $method, $postfields = NULL) {
     $this->http_info = array();
+    // Curl settings
+    // TODO: reuse curl object and avoid curl_init on each request. Possible ?
     $ci = curl_init();
-    /* Curl settings */
     curl_setopt($ci, CURLOPT_USERAGENT, $this->useragent);
     curl_setopt($ci, CURLOPT_CONNECTTIMEOUT, $this->connecttimeout);
     curl_setopt($ci, CURLOPT_TIMEOUT, $this->timeout);

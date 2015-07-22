@@ -51,28 +51,51 @@ class SARB
         $this->tBot->setAccessToken($authData['userId'], $authData['oauthToken'], $authData['oauthTokenSecret']);
     }
 
+    /**
+     * Getting user timeline and blocks Ids then search tweets.
+     * Fill the SARB account with no duplicate and no retweeted found tweets.
+     * 
+     * @param unknown $searchString
+     * @param unknown $onlyLang
+     * @throws Exception
+     */
     public function run($searchString, $onlyLang)
     {
 		if ($this->simulation) {
         	echo 'SIMULATION MODE','(searchString=', $searchString, '), (onlyLang=',$onlyLang,')',"\n";
         }
 
-        $userTweets = $this->tBot->getUserTimeline();
-        
-        if ($this->simulation) {
-            echo 'User tweets count = ', count($userTweets), "\n";
-        }
+        try {
+        	$userTweets = $this->tBot->getUserTimeline();
+        	if( ! is_array($userTweets))
+        		throw new \Exception('Failed to getUserTimeline()');
 
-        $blockedUsersIds = $this->tBot->getBlocksIds();
+        	if ($this->simulation) {
+        		echo 'User tweets count = ', count($userTweets), "\n";
+        	}
 
-        if ($this->simulation) {
-            echo 'Blocked users count = ', count($blockedUsersIds), "\n";
-        }
+        	$blockedUsersIds = $this->tBot->getBlocksIds();
+        	if( ! is_array($blockedUsersIds))
+        		throw new \Exception('Failed to getBlocksIds()');
 
-        $foundTweets = $this->tBot->searchTweets($searchString, self::SEARCH_COUNT, $onlyLang);
+        	if ($this->simulation) {
+        		echo 'Blocked users count = ', count($blockedUsersIds), "\n";
+        	}
 
-        if ($this->simulation) {
-            echo 'Found tweets count = ', count($foundTweets), "\n";
+        	$foundTweets = $this->tBot->searchTweets($searchString, self::SEARCH_COUNT, $onlyLang);
+        	if( ! is_array($foundTweets))
+        		throw new \Exception('Failed to searchTweets()');
+
+        	if ($this->simulation) {
+        		echo 'Found tweets count = ', count($foundTweets), "\n";
+        	}
+
+        }catch( Exception $ex ){
+
+        	echo 'ERROR: ',  $ex->getMessage(), "\n";
+        	echo 'ERROR: At line ',  $ex->getLine(), ' in ', $ex->getFile(), "\n";
+        	echo $ex->getTraceAsString(), "\n";
+        	return ;
         }
 
         $toRetweets = array();
