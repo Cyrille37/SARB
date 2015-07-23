@@ -65,7 +65,12 @@ class SARB
         	echo 'SIMULATION MODE','(searchString=', $searchString, '), (onlyLang=',$onlyLang,')',"\n";
         }
 
+        $userTweets = null ;
+        $blockedUsersIds = null ;
+        $foundTweets = null ;
+
         try {
+
         	$userTweets = $this->tBot->getUserTimeline();
         	if( ! is_array($userTweets))
         		throw new \Exception('Failed to getUserTimeline()');
@@ -73,6 +78,7 @@ class SARB
         	if ($this->simulation) {
         		echo 'User tweets count = ', count($userTweets), "\n";
         	}
+        	usleep(50*1000); // 50 ms
 
         	$blockedUsersIds = $this->tBot->getBlocksIds();
         	if( ! is_array($blockedUsersIds))
@@ -81,6 +87,7 @@ class SARB
         	if ($this->simulation) {
         		echo 'Blocked users count = ', count($blockedUsersIds), "\n";
         	}
+        	usleep(50*1000); // 50 ms
 
         	$foundTweets = $this->tBot->searchTweets($searchString, self::SEARCH_COUNT, $onlyLang);
         	if( ! is_array($foundTweets))
